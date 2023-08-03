@@ -1,89 +1,68 @@
 const express = require('express');
 const router = express.Router();
 const catchAsync = require('../utils/catchAsync');
-const ExpressError = require('../utils/ExpressError');
 const Campground = require('../models/campground')
-const { campgroundSchema, reviewSchema} = require('../schemas');
+const {isLoggedIn, isAuthor, validateCampground} = require("../middleware");
+
+// --------------------- CONTROLLERS ----------------------------   
+
+const campgrounds = require('../controllers/campgrounds')
+
+// ---------- UPLOADING IMAGE USING MULTER-----------------
+const multer = require('multer')
+const upload = multer({dest:'./upload'})
 
 
 
 // ----------------------------------  CAMPGROUNDS --------------------------------------
 
-// ---------------------------VALIDATION ---------------------------------
-const validateCampground = (req,res,next) => {
-    const {error} = campgroundSchema.validate(req.body)
-    if(error)
-    {
-        const msg = error.details.map(el => el.message).join(',')
-        throw new ExpressError(msg, 400)
-    }
-    else{
-        next();
-    }
-    
-}
-
+// --------------MIDDLEWARE THE YAHA PEHLE...NOW SHIFTED TO NEW FILE --------------
 // ------------------ INDEX -------------------------
-router.get('/', catchAsync(async (req,res) => {
-    const campgrounds = await Campground.find({})
-    res.render('campgrounds/index',{campgrounds})
 
-}))
+router.route('/')
+    .get(catchAsync(campgrounds.index))
+    .post(isLoggedIn,validateCampground, catchAsync(campgrounds.createNewForm))
 
+    // .post(upload.array('image'),(req,res) => {
+    //     res.send(req.file)
+    // })
 
-// --------------- NEW --------------------------------
-router.get('/new', catchAsync(async(req,res) => {
-    res.render('campgrounds/new')
-}))
-
-router.post('/',validateCampground, catchAsync(async (req, res, next) => {
-    // if(rea.body.campground) throw new ExpressError('Invalid data', 400)
-    const campground = new Campground(req.body.campground);
-    await campground.save();
-    req.flash('success', 'Successfully made a new campground');
-
-    res.redirect(`/campgrounds/${campground._id}`)
     
-}))
+router.get('/new',isLoggedIn, catchAsync(campgrounds.renderNewForm));
 
-// ----------------- SHOW----------------------------
+router.route('/:id')
+    .get(catchAsync(campgrounds.ShowCampground))
+    .put(isAuthor,isLoggedIn,validateCampground,catchAsync(campgrounds.CreateEditForm))
+    .delete(isAuthor,isLoggedIn,catchAsync(campgrounds.DeleteForm))
 
-router.get('/:id', catchAsync(async(req,res) => {
-    const campgrounds = await Campground.findById(req.params.id).populate('reviews');
-    if (!campgrounds) {
-        req.flash('error', 'Cannot find that campground!');
-        return res.redirect('/campgrounds');
-    }
-    res.render('campgrounds/show',{campgrounds})
-}))
-
-// ------------ UPDATE/EDIT ------------------
-
-router.get('/:id/edit', catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id)
-    if (!campground) {
-        req.flash('error', 'Cannot find that campground!');
-        return res.redirect('/campgrounds');
-    }
-    res.render('campgrounds/edit', { campground });
-}))
-
-router.put('/:id', validateCampground,catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground });
-    req.flash("success", "Successfully updated campground")
-    res.redirect(`/campgrounds/${campground._id}`)
-}));
+router.get('/:id/edit', isAuthor,isAuthor,isLoggedIn,catchAsync(campgrounds.renderEdit))
 
 
-//------------------------ DELETE ---------------------------
 
-router.delete('/:id', catchAsync(async (req, res) => {
-    const { id } = req.params;
-    await Campground.findByIdAndDelete(id);
-    req.flash("success", "Successfully deleted campground")
-    res.redirect('/campgrounds');
-}));
+
+// // ---- PEHLE AISA KIYE THE --------------------------------------------    
+// router.get('/', catchAsync(campgrounds.index));
+
+
+// // --------------- NEW --------------------------------
+// router.get('/new',isLoggedIn, catchAsync(campgrounds.renderNewForm));
+
+// router.post('/',isLoggedIn,validateCampground, catchAsync(campgrounds.createNewForm))
+
+// // ----------------- SHOW----------------------------
+
+// router.get('/:id',catchAsync(campgrounds.ShowCampground))
+
+// // ------------ UPDATE/EDIT ------------------
+
+// router.get('/:id/edit', isAuthor,isAuthor,isLoggedIn,catchAsync(campgrounds.renderEdit))
+
+// router.put('/:id', isAuthor,isLoggedIn,validateCampground,catchAsync(campgrounds.CreateEditForm))
+
+
+// //------------------------ DELETE ---------------------------
+
+// router.delete('/:id', isAuthor,isLoggedIn,catchAsync(campgrounds.DeleteForm))
 
 
 module.exports = router;
