@@ -1,0 +1,36 @@
+body {
+    width: 100%;
+    height: 100%;
+     
+
+    /* Background image is centered vertically and horizontally at all times */
+    background-position: center center;
+
+    /* Background image doesn't tile */
+    background-repeat: no-repeat;
+
+    /* Background image is fixed in the viewport so that it doesn't move when 
+    the content's height is greater than the image's height */
+    background-attachment: fixed;
+
+    /* This is what makes the background image rescale based
+    on the container's size */
+    background-size: cover;
+
+    /* Set a background color that will be displayed
+    while the background image is loading */
+    background-color: green;
+
+    /* Location of the image */
+    background-image:url('https://png.pngtree.com/background/20230519/original/pngtree-night-camping-on-a-grassy-pasture-picture-image_2650533.jpg') ;
+}  
+
+/* 
+.card-body {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+
+} */
