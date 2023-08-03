@@ -8,9 +8,10 @@ const {isLoggedIn, isAuthor, validateCampground} = require("../middleware");
 
 const campgrounds = require('../controllers/campgrounds')
 
-// ---------- UPLOADING IMAGE USING MULTER-----------------
+// ---------- UPLOADING IMAGE USING MULTER.... CLOUDINARY-----------------
+const {storage} = require('../cloudinary')
 const multer = require('multer')
-const upload = multer({dest:'./upload'})
+const upload = multer({storage})
 
 
 
@@ -21,10 +22,10 @@ const upload = multer({dest:'./upload'})
 
 router.route('/')
     .get(catchAsync(campgrounds.index))
-    .post(isLoggedIn,validateCampground, catchAsync(campgrounds.createNewForm))
+    .post(isLoggedIn,upload.array('image'),validateCampground,catchAsync(campgrounds.createNewForm))
 
     // .post(upload.array('image'),(req,res) => {
-    //     res.send(req.file)
+    //     res.send(req.files)
     // })
 
     
@@ -32,7 +33,7 @@ router.get('/new',isLoggedIn, catchAsync(campgrounds.renderNewForm));
 
 router.route('/:id')
     .get(catchAsync(campgrounds.ShowCampground))
-    .put(isAuthor,isLoggedIn,validateCampground,catchAsync(campgrounds.CreateEditForm))
+    .put(isAuthor,isLoggedIn,upload.array('image'),validateCampground,catchAsync(campgrounds.CreateEditForm))
     .delete(isAuthor,isLoggedIn,catchAsync(campgrounds.DeleteForm))
 
 router.get('/:id/edit', isAuthor,isAuthor,isLoggedIn,catchAsync(campgrounds.renderEdit))
