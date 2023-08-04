@@ -11,6 +11,11 @@ const Campground = require('./models/campground')
 const methodOverride = require('method-override');
 const catchAsync = require('./utils/catchAsync');
 const ExpressError = require('./utils/ExpressError');
+
+
+const db_url = process.env.DB_URL
+
+
 //------------ ROUTES ----------------------------------------------
 const campgroundRoutes = require("./routes/campgrounds")
 const reviewRoutes= require("./routes/reviews")
@@ -108,7 +113,8 @@ app.use(
 );
 
 // ------------------------- COONECTING TO MONGODB ------------------------
-mongoose.connect('mongodb://localhost:27017/yelp-camp' , { 
+// mongodb://localhost:27017/yelp-camp
+mongoose.connect("mongodb://localhost:27017/yelp-camp" , { 
     useNewUrlParser: true, 
     useUnifiedTopology: true,
     

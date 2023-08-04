@@ -1,18 +1,18 @@
 <% layout('layouts/boilerplate')%>
 <link rel="stylesheet" href="/stylesheets/backgroundimg.css">
 <div class="row">
-    <h1 class="text-center">New Campground</h1>
+    <h1 class="text-center" style="color:white;">New Campground</h1>
     <div class="col-6 offset-3">
         <form action="/campgrounds" method="POST" novalidate class="validated-form" enctype="multipart/form-data">
             <div class="mb-3">
-                <label class="form-label" for="title">Title</label>
+                <label class="form-label" for="title" style="color:white;">Title</label>
                 <input class="form-control" type="text" id="title" name="campground[title]" required>
                 <div class="valid-feedback">
                     Looks good!
                 </div>
             </div>
             <div class="mb-3">
-                <label class="form-label" for="location">Location</label>
+                <label class="form-label" for="location" style="color:white;">Location</label>
                 <input class="form-control" type="text" id="location" name="campground[location]" required>
                 <div class="valid-feedback">
                     Looks good!
@@ -22,7 +22,7 @@
             <input type="file" name="image" id="" multiple>
           
             <div class="mb-3">
-                <label class="form-label" for="price">Campground Price</label>
+                <label class="form-label" for="price" style="color:white;">Campground Price</label>
                 <div class="input-group">
                     <span class="input-group-text" id="price-label">$</span>
                     <input type="text" class="form-control" id="price" placeholder="0.00" aria-label="price"
@@ -34,7 +34,7 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label" for="description">Description</label>
+                <label class="form-label" for="description" style="color:white;">Description</label>
                 <textarea class="form-control" type="text" id="description" name="campground[description]" required"></textarea>
                 <div class="valid-feedback">
                     Looks good!
