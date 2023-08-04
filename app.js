@@ -16,6 +16,9 @@ const campgroundRoutes = require("./routes/campgrounds")
 const reviewRoutes= require("./routes/reviews")
 const userRoutes = require("./routes/users")
 
+//--------------------- for security ----------------------
+const helmet = require('helmet')
+
 // -------------------------------------------------------------------
 const session = require("express-session")
 const flash = require("connect-flash")
@@ -26,12 +29,83 @@ const ejsMate = require('ejs-mate');
 const passport = require('passport');
 const LocalStrategy = require('passport-local'); // authentication
 const User = require('./models/user');
+
+// ------- MONGO SANITIZE-----------------
+
+const mongoSanitize = require('express-mongo-sanitize')
+
+// --------------------------------------------------
 app.engine('ejs',ejsMate);
 app.use(methodOverride('_method'));
 
 app.use(express.urlencoded({ extended: true }));
 const mongoose = require('mongoose');
 const { validate } = require('./models/campground');
+
+// app.use(helmet({contentSecurityPolicy: false }))
+
+
+const scriptSrcUrls = [
+    "https://stackpath.bootstrapcdn.com/",
+    "https://api.tiles.mapbox.com/",
+    "https://api.mapbox.com/",
+    "https://kit.fontawesome.com/",
+    "https://cdnjs.cloudflare.com/",
+    "https://cdn.jsdelivr.net",
+
+];
+const styleSrcUrls = [
+    "https://kit-free.fontawesome.com/",
+    "https://stackpath.bootstrapcdn.com/",
+    "https://api.mapbox.com/",
+    "https://api.tiles.mapbox.com/",
+    "https://fonts.googleapis.com/",
+    "https://use.fontawesome.com/",
+];
+const connectSrcUrls = [
+    "https://api.mapbox.com/",
+    "https://a.tiles.mapbox.com/",
+    "https://b.tiles.mapbox.com/",
+    "https://events.mapbox.com/",
+
+];
+const fontSrcUrls = [];
+
+
+
+
+
+
+
+
+
+
+//------------------------- using helmet for security-----------------------------------
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: [],
+            connectSrc: ["'self'", ...connectSrcUrls],
+            scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+            styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+            workerSrc: ["'self'", "blob:"],
+            objectSrc: [],
+            imgSrc: [
+                "'self'",
+                "blob:",
+                "data:",
+                "https://res.cloudinary.com/dmhzjbuis/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT! 
+                "https://images.unsplash.com/",
+                "https://png.pngtree.com/background/20230519/original/pngtree-night-camping-on-a-grassy-pasture-picture-image_2650533.jpg",
+                "https://cdn.wallpapersafari.com/74/45/Tm67Ja.jpg",
+                "https://cdn.wallpapersafari.com/74/45/Tm67Ja.jpg",
+                "https://png.pngtree.com/background/20230518/original/pngtree-people-in-the-countryside-around-a-campfire-in-the-night-picture-image_2647056.jpg",
+
+            ],
+            fontSrc: ["'self'", ...fontSrcUrls],
+        },
+    })
+);
 
 // ------------------------- COONECTING TO MONGODB ------------------------
 mongoose.connect('mongodb://localhost:27017/yelp-camp' , { 
@@ -53,17 +127,23 @@ app.set('view engine', 'ejs');
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(mongoSanitize({
+    replaceWith: '_'
+}))
+
 
 // -------------------- SESSIONS ----------------------
 const sessionConfig = {
+    name: "mycookie",
     secret: 'shhhhhhhhhhhhhhhhhhh',
     resave: false,
     saveUninitialized: true,
     //store: mongo /// storing data to cloud....restore the data even if we stop the server
     cookie: {
-        httpOnly: true,
-        // expires: Date.now() + 1000*60*60*24*7,
-        // maxAge: 1000*60*60*24*7
+        httpOnly: true, // only accessible over http not js
+        // secure: true,
+        expires: Date.now() + 1000*60*60*24*7,
+        maxAge: 1000*60*60*24*7
     }
 }
 
@@ -93,6 +173,7 @@ app.get('/fakeUser', async(req,res) => {
 // -------------------------- ROUTES FROM CAMPGROUNDS and REVIEWS ---------------------------
 
 app.use((req,res,next) => {
+    console.log(req.query)
     res.locals.currentUser = req.user;
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
