@@ -15,6 +15,7 @@ const ExpressError = require('./utils/ExpressError');
 
 const db_url = process.env.DB_URL
 
+const MongoStore = require("connect-mongo")(session);
 
 //------------ ROUTES ----------------------------------------------
 const campgroundRoutes = require("./routes/campgrounds")
@@ -137,9 +138,20 @@ app.use(mongoSanitize({
     replaceWith: '_'
 }))
 
+// storing sessions to MongoDB
+const store = new MongoStore({
+    url: "mongodb://localhost:27017/yelp-camp",
+    secret: 'shhhhhhhhhhhhhhhhhhh',
+    touchAfter: 24*60*60
+})
+
+store.on("error", function(e){
+    console.log("SESSION STORE ERROR")
+})
 
 // -------------------- SESSIONS ----------------------
 const sessionConfig = {
+    store,
     name: "mycookie",
     secret: 'shhhhhhhhhhhhhhhhhhh',
     resave: false,
