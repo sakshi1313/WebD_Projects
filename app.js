@@ -15,7 +15,7 @@ const ExpressError = require('./utils/ExpressError');
 
 const db_url = process.env.DB_URL
 
-const MongoStore = require("connect-mongo")(session);
+
 
 //------------ ROUTES ----------------------------------------------
 const campgroundRoutes = require("./routes/campgrounds")
@@ -35,6 +35,7 @@ const ejsMate = require('ejs-mate');
 const passport = require('passport');
 const LocalStrategy = require('passport-local'); // authentication
 const User = require('./models/user');
+const MongoStore = require("connect-mongo")(session);
 
 // ------- MONGO SANITIZE-----------------
 
@@ -115,7 +116,8 @@ app.use(
 
 // ------------------------- COONECTING TO MONGODB ------------------------
 // mongodb://localhost:27017/yelp-camp
-mongoose.connect("mongodb://localhost:27017/yelp-camp" , { 
+// mongoose.connect("mongodb://localhost:27017/yelp-camp" , { 
+mongoose.connect(db_url, { 
     useNewUrlParser: true, 
     useUnifiedTopology: true,
     
@@ -140,7 +142,8 @@ app.use(mongoSanitize({
 
 // storing sessions to MongoDB
 const store = new MongoStore({
-    url: "mongodb://localhost:27017/yelp-camp",
+    // url: "mongodb://localhost:27017/yelp-camp",
+    url: db_url,
     secret: 'shhhhhhhhhhhhhhhhhhh',
     touchAfter: 24*60*60
 })
